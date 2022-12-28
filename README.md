@@ -1,3 +1,3 @@
 # k8s-prestop-sidecar
 
-returns 200 or 503 from / depending on /stop or /play
+returns 503 from / after a call to /stop which hangs for 31s
