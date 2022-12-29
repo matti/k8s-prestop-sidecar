@@ -1,6 +1,6 @@
 # k8s-prestop-sidecar
 
-returns 503 to healthchecks after SIGTERM and waits until no requests arrive before exiting
+returns 503 to healthchecks after SIGTERM and waits until no requests arrive before exiting after COOLDOWN duration
 
 - /* counts as healtcheck requests with the exception of:
 - /waitz endpoint which hangs until no healthcheck requests are received

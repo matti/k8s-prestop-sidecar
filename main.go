@@ -78,6 +78,14 @@ func main() {
 	}
 	rate = ratecounter.NewRateCounter(interval)
 
+	cooldown := 60 * time.Second
+	if s := os.Getenv("COOLDOWN"); s != "" {
+		if d, err := time.ParseDuration(s); err != nil {
+			panic(err)
+		} else {
+			cooldown = d
+		}
+	}
 	var port = "8080"
 	if p := os.Getenv("PORT"); p != "" {
 		port = p
@@ -103,6 +111,9 @@ func main() {
 		}
 		time.Sleep(time.Second)
 	}
+
+	log.Println("cooldown", cooldown)
+	time.Sleep(cooldown)
 
 	log.Println("completed")
 	completed = true
