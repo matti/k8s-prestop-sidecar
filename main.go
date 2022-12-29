@@ -18,6 +18,25 @@ import (
 type Handler struct{}
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == "/readyz" {
+		log.Println("/readyz", "from", r.RemoteAddr, "current rate", rate.Rate(), "requests in", interval)
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	if r.URL.Path == "/waitz" {
+		log.Println("/waitz", "from", r.RemoteAddr, "current rate", rate.Rate(), "requests in", interval)
+		for {
+			if completed {
+				break
+			}
+			time.Sleep(time.Second)
+		}
+
+		w.WriteHeader(http.StatusGone)
+		return
+	}
+
 	rate.Incr(1)
 
 	status := http.StatusOK
@@ -33,6 +52,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 var shutdown = false
+var completed = false
+
 var rate *ratecounter.RateCounter
 var interval time.Duration
 
@@ -83,6 +104,11 @@ func main() {
 		time.Sleep(time.Second)
 	}
 
+	log.Println("completed")
+	completed = true
+	time.Sleep(time.Second)
+
+	log.Println("exiting")
 	if err := server.Shutdown(ctx); err != nil {
 		panic(err)
 	}

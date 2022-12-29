@@ -2,6 +2,10 @@
 
 returns 503 to healthchecks after SIGTERM and waits until no requests arrive before exiting
 
+- /* counts as healtcheck requests with the exception of:
+- /waitz endpoint which hangs until no healthcheck requests are received
+- /readyz endpoint which does NOT count as healtcheck requests
+
 ```console
 $ INTERVAL=6s LOG=yes go run main.go
 2022/12/29 11:54:48 k8s-prestop-sidecar started
