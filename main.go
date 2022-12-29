@@ -19,18 +19,32 @@ type Handler struct{}
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/readyz" {
-		log.Println("/readyz", "from", r.RemoteAddr, "current rate", rate.Rate(), "requests in", interval)
-		w.WriteHeader(http.StatusOK)
+		status := http.StatusOK
+		if shutdown {
+			status = http.StatusServiceUnavailable
+		}
+
+		log.Println("/readyz", "from", r.RemoteAddr, "status", status, "current rate", rate.Rate(), "requests in", interval)
+
+		w.WriteHeader(status)
 		return
 	}
 
 	if r.URL.Path == "/waitz" {
 		log.Println("/waitz", "from", r.RemoteAddr, "current rate", rate.Rate(), "requests in", interval)
+
 		for {
 			if completed {
 				break
 			}
-			time.Sleep(time.Second)
+			select {
+			case <-r.Context().Done():
+				log.Println("/waitz", "gone")
+				return
+			default:
+				log.Println("/waitz", "active", "from", r.RemoteAddr)
+				time.Sleep(time.Second)
+			}
 		}
 
 		w.WriteHeader(http.StatusGone)
