@@ -49,7 +49,6 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				log.Println("/waitz", "gone")
 				return
 			default:
-				log.Println("/waitz", "active", "from", r.RemoteAddr)
 				time.Sleep(time.Second)
 			}
 		}
@@ -133,12 +132,11 @@ func main() {
 		time.Sleep(time.Second)
 	}
 
-	log.Println("cooldown", cooldown)
+	log.Println("cooldown for", cooldown, "before releasing /waitz")
 	time.Sleep(cooldown)
 
 	log.Println("completed")
 	completed = true
-	time.Sleep(time.Second)
 
 	log.Println("exiting")
 	if err := server.Shutdown(ctx); err != nil {
