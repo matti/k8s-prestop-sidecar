@@ -18,6 +18,13 @@ import (
 type Handler struct{}
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == "/healthz" {
+		log.Println("/healthz", "from", r.RemoteAddr, "current rate", rate.Rate(), "requests in", interval)
+
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
 	if r.URL.Path == "/readyz" {
 		status := http.StatusOK
 		if shutdown {
@@ -82,7 +89,7 @@ func main() {
 		log.SetOutput(ioutil.Discard)
 	}
 
-	interval = 15 * time.Second
+	interval = 10 * time.Second
 	if s := os.Getenv("INTERVAL"); s != "" {
 		if d, err := time.ParseDuration(s); err != nil {
 			panic(err)
@@ -92,7 +99,7 @@ func main() {
 	}
 	rate = ratecounter.NewRateCounter(interval)
 
-	cooldown := 60 * time.Second
+	cooldown := 10 * time.Second
 	if s := os.Getenv("COOLDOWN"); s != "" {
 		if d, err := time.ParseDuration(s); err != nil {
 			panic(err)
