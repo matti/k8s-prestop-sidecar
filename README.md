@@ -2,7 +2,7 @@
 
 why: AWS NLB ignores Kubernetes Endpoints and is slow to react. see https://github.com/kubernetes-sigs/aws-load-balancer-controller/issues/1834#issuecomment-1307517023
 
-Set this sidecar to be the health check port and it will returns 503 to healthchecks after SIGTERM and waits until no requests arrive before exiting after COOLDOWN duration
+Set this sidecar as the health check port and it will return 503 to the (aws) healthchecks after SIGTERM and waits until no requests arrive before exiting after COOLDOWN duration.
 
 ## Routes
 
