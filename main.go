@@ -17,11 +17,17 @@ import (
 
 type Handler struct{}
 
+func logger(w http.ResponseWriter, parts ...any) {
+	line := fmt.Sprintln(parts...)
+	log.Println(line)
+	w.Write([]byte(line))
+}
+
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/healthz" {
-		log.Println("/healthz", "from", r.RemoteAddr, "current rate", rate.Rate(), "requests in", interval)
-
 		w.WriteHeader(http.StatusOK)
+		logger(w, "/healthz", "from", r.RemoteAddr, "current rate", rate.Rate(), "requests in", interval)
+
 		return
 	}
 
@@ -31,15 +37,14 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			status = http.StatusServiceUnavailable
 		}
 
-		log.Println("/readyz", "from", r.RemoteAddr, "status", status, "current rate", rate.Rate(), "requests in", interval)
-
 		w.WriteHeader(status)
+		logger(w, "/readyz", "from", r.RemoteAddr, "status", status, "current rate", rate.Rate(), "requests in", interval)
+
 		return
 	}
 
 	if r.URL.Path == "/waitz" {
 		log.Println("/waitz", "from", r.RemoteAddr, "current rate", rate.Rate(), "requests in", interval)
-
 		for {
 			if completed {
 				break
@@ -54,6 +59,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.WriteHeader(http.StatusGone)
+
 		return
 	}
 
@@ -65,10 +71,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(status)
-	body := fmt.Sprintf("%d\n", status)
-	w.Write([]byte(body))
-
-	log.Println("hit", r.URL.Path, "from", r.RemoteAddr, "status", status, "current rate", rate.Rate(), "requests in", interval)
+	logger(w, "hit", r.URL.Path, "from", r.RemoteAddr, "status", status, "current rate", rate.Rate(), "requests in", interval)
 }
 
 var shutdown = false
